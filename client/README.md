@@ -30,3 +30,15 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+## Deployment
+
+The production frontend is deployed at <https://pantry-pulse-beta.vercel.app>.
+Vercel uses this directory as the project root and builds it with `npm run build`.
+Set these production environment variables in Vercel:
+
+- `VITE_API_URL=https://pantrypulse-api.onrender.com/api`
+- `VITE_SOCKET_URL=https://pantrypulse-api.onrender.com`
+
+The Express API and Socket.IO server run on Render. Its free instance may spin down
+when idle, so the first API request after inactivity can take longer than usual.
