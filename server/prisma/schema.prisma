@@ -1,0 +1,121 @@
+datasource db {
+  provider  = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Models
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  name        String
+  deviceId    String   @unique
+  ipAddress   String?
+  firmware    String?
+  lastSeen    DateTime?
+  status      String   @default("ONLINE") // ONLINE / OFFLINE
+  shelves     Shelf[]
+  telemetries Telemetry[]
+}
+
+model Shelf {
+  id          String   @id @default(uuid())
+  shelfId     String   @unique @default("")
+  name        String
+  maxCapacity Float
+  deviceId    String
+  device      Device   @relation(fields: [deviceId], references: [id])
+  sensors     Sensor[]
+  inventory   InventoryItem[]
+  telemetry   Telemetry[]
+}
+
+model Sensor {
+  id      String   @id @default(uuid())
+  type    String   // HX711, DHT22, MQ, RFID
+  health  String   @default("HEALTHY") // HEALTHY / UNHEALTHY
+  shelfId String
+  shelf   Shelf    @relation(fields: [shelfId], references: [id])
+}
+
+model Telemetry {
+  id          String   @id @default(uuid())
+  shelfId     String
+  shelf       Shelf    @relation(fields: [shelfId], references: [id])
+  deviceId    String
+  device      Device   @relation(fields: [deviceId], references: [id])
+  weight      Float
+  temperature Float
+  humidity    Float
+  voc         Float
+  gasStatus   String
+  timestamp   DateTime @default(now())
+}
+
+model FoodItem {
+  id       String @id @default(uuid())
+  name     String
+  category String
+  batches  Batch[]
+}
+
+model Batch {
+  id          String   @id @default(uuid())
+  batchId     String   @unique
+  foodItemId  String
+  foodItem    FoodItem @relation(fields: [foodItemId], references: [id])
+  quantity    Int
+  weight      Float
+  expiryDate  DateTime
+  rfidTagId   String?
+  createdAt   DateTime @default(now())
+  inventory   InventoryItem[]
+}
+
+model InventoryItem {
+  id        String   @id @default(uuid())
+  batchId   String
+  batch     Batch    @relation(fields: [batchId], references: [id])
+  shelfId   String
+  shelf     Shelf    @relation(fields: [shelfId], references: [id])
+  quantity  Int
+  weight    Float
+  status    String   @default("GOOD") // GOOD, EXPIRING_SOON, EXPIRED, LOW_STOCK, SURPLUS
+  addedAt   DateTime @default(now())
+  surplusItem SurplusItem?
+}
+
+model Alert {
+  id          String   @id @default(uuid())
+  type        String   // same values as before
+  severity    String   // INFO / WARNING / CRITICAL
+  shelfId     String?
+  deviceId    String?
+  description String
+  timestamp   DateTime @default(now())
+  read        Boolean  @default(false)
+  resolved    Boolean  @default(false)
+}
+
+model SurplusItem {
+  id          String @id @default(uuid())
+  inventoryId String @unique
+  inventory   InventoryItem @relation(fields: [inventoryId], references: [id])
+  detectedAt  DateTime @default(now())
+  action      String? // DONATION / USED / DISMISSED
+}
+
+model Setting {
+  key   String @id
+  value String
+}

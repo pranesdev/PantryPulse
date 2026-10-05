@@ -1,0 +1,209 @@
+@import "tailwindcss";
+@config "../tailwind.config.cjs";
+
+:root {
+  --brand-green: #19745a;
+  --canvas: #f2f4f0;
+  --surface: #ffffff;
+  --surface-muted: #f7f9f6;
+  --ink: #1a2923;
+  --muted: #64736b;
+  --line: #d9e1da;
+  --bg-dark: #f2f4f0;
+  --bg-card: #ffffff;
+  --text-primary: #1a2923;
+  --text-secondary: #64736b;
+}
+
+html {
+  min-height: 100%;
+  margin: 0;
+}
+
+body, #root {
+  min-height: 100vh;
+  margin: 0;
+}
+
+body {
+  @apply bg-[var(--canvas)] text-[var(--ink)];
+  font-family: 'DM Sans', ui-sans-serif, sans-serif;
+  font-feature-settings: 'ss01' on;
+}
+
+.font-mono,
+.tabular-nums {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+#root {
+  max-width: 100%;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+[class~="bg-[#020817]"] {
+  background-color: var(--canvas) !important;
+  color: var(--ink);
+}
+
+header[class~="bg-slate-950/80"] {
+  background-color: rgb(255 255 255 / 94%) !important;
+  border-color: var(--line) !important;
+  backdrop-filter: blur(12px);
+}
+
+aside[class~="bg-slate-950/95"] {
+  background-color: #17392f !important;
+  border-color: #24493e !important;
+}
+
+[class~="bg-slate-900/60"] {
+  background-color: var(--surface) !important;
+}
+
+[class~="bg-slate-900/50"],
+[class~="bg-slate-950/50"],
+[class~="bg-slate-950/60"],
+[class~="bg-slate-950/70"],
+[class~="bg-slate-950/40"] {
+  background-color: var(--surface-muted) !important;
+}
+
+[class~="bg-slate-900"] {
+  background-color: #f4f7f3 !important;
+}
+
+[class~="bg-slate-950"] {
+  background-color: #fbfcfa !important;
+}
+
+[class~="bg-slate-800"] {
+  background-color: #e8eee8 !important;
+}
+
+[class~="text-white"],
+[class~="text-slate-100"] {
+  color: var(--ink) !important;
+}
+
+aside [class~="text-white"],
+aside [class~="text-slate-100"] {
+  color: #f7faf7 !important;
+}
+
+aside [class~="text-slate-200"],
+aside [class~="text-slate-300"] {
+  color: #d6e2da !important;
+}
+
+aside [class~="text-slate-400"],
+aside [class~="text-slate-500"] {
+  color: #a8beb1 !important;
+}
+
+[class~="text-slate-200"],
+[class~="text-slate-300"] {
+  color: #34463d !important;
+}
+
+[class~="text-slate-400"] {
+  color: var(--muted) !important;
+}
+
+[class~="text-slate-500"] {
+  color: #718078 !important;
+}
+
+[class~="text-emerald-200"] {
+  color: #17624c !important;
+}
+
+[class~="text-emerald-300"] {
+  color: #167052 !important;
+}
+
+[class~="text-sky-200"] {
+  color: #145b70 !important;
+}
+
+[class~="text-amber-200"] {
+  color: #77530d !important;
+}
+
+[class~="text-rose-200"] {
+  color: #8a3442 !important;
+}
+
+aside [class~="text-emerald-200"],
+aside [class~="text-emerald-300"] {
+  color: #8ee0b6 !important;
+}
+
+[class~="border-slate-800"],
+[class~="border-slate-700"] {
+  border-color: var(--line) !important;
+}
+
+aside [class~="border-slate-800"],
+aside [class~="border-slate-700"] {
+  border-color: #31564a !important;
+}
+
+aside [class~="bg-slate-900/60"] {
+  background-color: #204739 !important;
+  border-color: #315b4b !important;
+}
+
+aside [class~="text-amber-200"] {
+  color: #ffd27a !important;
+}
+
+[class~="rounded-3xl"],
+[class~="rounded-2xl"] {
+  border-radius: 8px !important;
+}
+
+[class~="rounded-xl"] {
+  border-radius: 6px !important;
+}
+
+[class~="bg-slate-950/40"] {
+  background-color: #fbfcfa !important;
+}
+
+input,
+select,
+textarea {
+  color: var(--ink);
+}
+
+.recharts-cartesian-grid line {
+  stroke: #e1e7e1 !important;
+}
+
+.recharts-cartesian-axis-tick text,
+.recharts-label {
+  fill: #718078 !important;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.recharts-default-tooltip {
+  background-color: #ffffff !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 16px rgb(26 41 35 / 8%);
+}
+
+.recharts-tooltip-label,
+.recharts-tooltip-item,
+.recharts-legend-item-text {
+  color: var(--ink) !important;
+}
+
+[class~="shadow-[0_12px_40px_rgba(15,23,42,0.45)]"] {
+  box-shadow: 0 1px 2px rgb(22 42 32 / 5%) !important;
+}

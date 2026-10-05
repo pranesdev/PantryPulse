@@ -1,0 +1,193 @@
+PantryPulse – Comprehensive Documentation
+
+=== Project Overview & Complete Project Analysis ===
+
+Purpose: Real‑time IoT dashboard for commercial‑kitchen & food‑storage monitoring (weight, temperature, humidity, VOC, RFID, alerts).
+Problem: Food waste & spoilage caused by lack of visibility into storage conditions and inventory.
+Solution: ESP32 devices stream sensor data → Backend stores telemetry & generates alerts → Web UI visualises KPIs, shelf status, inventory, and alerts.
+Target Users: Kitchen managers, hotel F&B directors, restaurant owners, facility operators, investors / demo reviewers.
+Core Use‑Cases: View live KPI dashboard, inspect per‑shelf weight & environment, add / edit inventory items, receive & resolve alerts, configure thresholds, run RFID scans, export telemetry reports.
+Key Features Implemented: Telemetry ingestion, realtime via Socket.IO, KPI dashboard, shelves grid, inventory table, alerts list, settings page, demo‑mode seed data.
+Tech Stack: Frontend – React 18, TypeScript, Vite, Tailwind, shadcn/ui, Lucide‑react, Recharts, Framer‑Motion, React‑Query. Backend – Node 18, Express, TypeScript, Socket.IO, Prisma 5 (SQLite), Zod.
+Constraints: SQLite limits concurrent writes; no authentication; ESP32 must send valid JSON.
+
+=== System Architecture & Data Flow ===
+
+Frontend:
+- Framework: React 18 (function components, hooks).
+- Bundler: Vite (port 5173/5174).
+- Routing: react‑router‑dom (AppRoutes defines /, /shelves, /inventory, /alerts, /settings).
+- State: React‑Query for server state; local React state for UI toggles.
+- Services: Central API wrapper src/lib/api.ts (placeholder methods).
+- Realtime: socket.io-client (not yet imported) expects events telemetry:update, device:update, alert:update, etc.
+- No authentication; CORS whitelist.
+- UI: Sidebar, Layout, KPI cards, shelves grid, inventory table, alerts list, settings form.
+- Responsive: Sidebar hidden on < md; no mobile drawer.
+
+Backend:
+- Framework: Express 4.x with TypeScript.
+- Middleware: cors (whitelist), helmet, express.json, morgan (logging), custom errorHandler.
+- Routes (mounted under /api): health, dashboard, telemetry, shelves, inventory, alerts, devices, settings, surplus, reports, rfid.
+- Controllers: telemetryController handles validation, storage, alerts, realtime emit.
+- Services: prisma (PrismaClient), http (helpers asyncRoute, HttpError, parseInput, parseRange).
+- Realtime: Socket.IO server emits telemetry:update, device:update, alert:update, shelf:update, inventory:update, surplus:update, settings:update.
+- Validation: Zod schemas for request bodies.
+- No auth/authorisation; all endpoints open.
+- DB: SQLite via Prisma schema (Device, Shelf, Telemetry, FoodItem, Batch, InventoryItem, Alert, SurplusItem, Setting).
+
+Data Flow (Typical):
+1. ESP32 sends POST /api/telemetry → validation → DB transaction → update Device.lastSeen → generate alerts → emit Socket.IO events.
+2. Dashboard GET /api/dashboard → aggregated queries → UI renders KPI cards.
+3. Shelf CRUD via POST/PATCH/DELETE routes → DB ops → socket events.
+4. Inventory CRUD → auto-status calculation, surplus detection, socket events.
+5. Alert management (read, resolve) → DB update → socket events.
+6. Settings get/put → DB upsert → socket broadcast.
+7. RFID scan → lookup batch/inventory.
+8. Report export → CSV streaming.
+
+=== Software Requirements Specification (SRS) ===
+
+Functional Requirements (selected):
+- FR‑001 Telemetry Ingestion (POST /api/telemetry) – IMPLEMENTED.
+- FR‑002 Dashboard Data Retrieval (GET /api/dashboard) – IMPLEMENTED.
+- FR‑003 Shelf CRUD (GET/POST/PATCH/DELETE /api/shelves) – IMPLEMENTED (Delete blocked if referenced).
+- FR‑004 Inventory CRUD + Auto‑Status (GET/POST/PATCH/DELETE /api/inventory) – IMPLEMENTED.
+- FR‑005 Alert Management (GET /api/alerts, PATCH read/resolve) – IMPLEMENTED.
+- FR‑006 Settings CRUD (GET /api/settings, PUT /api/settings/:key) – IMPLEMENTED.
+- FR‑007 RFID Scan (POST /api/rfid/scan) – IMPLEMENTED.
+- FR‑008 Report Export (GET /api/reports/export.csv) – IMPLEMENTED.
+- FR‑009 Device CRUD – IMPLEMENTED.
+- FR‑010 Surplus Detection & Action – IMPLEMENTED.
+- FR‑011 Demo Mode Seed – IMPLEMENTED.
+- FR‑012 Real‑time Updates – IMPLEMENTED (events emitted).
+
+Non‑Functional Requirements:
+- Performance: Telemetry ingest ≤ 30 ms; dashboard aggregation ≤ 500 ms.
+- Scalability: SQLite limited – replace with PostgreSQL for production.
+- Security: No auth (major gap); Helmet adds basic headers; CORS whitelist.
+- Reliability: Server restarts preserve DB; no retry logic for telemetry.
+- Usability: UI minimal, lacks loading skeletons, mobile drawer, dark‑mode toggle.
+- Accessibility: No ARIA attributes, focus management – needs work.
+- Data Retention: No purge – DB grows indefinitely.
+- Logging: morgan logs requests; console errors – no structured logging.
+
+Gaps:
+- Authentication & role‑based permissions – MISSING.
+- Mobile‑first navigation – MISSING.
+- Dark‑mode toggle – MISSING.
+- Rate‑limiting – MISSING.
+- Unit / integration tests – MISSING.
+- OpenAPI spec – MISSING.
+- Pagination on list endpoints – MISSING.
+- Structured logging, health endpoint for Socket.IO – MISSING.
+
+=== API & Database Documentation ===
+
+API Endpoints (summary):
+- GET /api/health – health check.
+- GET /api/dashboard?range=... – aggregated metrics.
+- POST /api/telemetry – ingest telemetry (validation via Zod, creates alerts, emits events).
+- GET /api/shelves – list shelves with telemetry, device, sensor list, inventory count.
+- GET /api/shelves/:shelfId – detailed shelf view (not used by UI yet).
+- POST /api/shelves – create shelf (validate with createShelfSchema).
+- PATCH /api/shelves/:shelfId – update shelf.
+- DELETE /api/shelves/:shelfId – delete if no references.
+- GET /api/inventory – searchable list (filters: search, shelfId, category).
+- POST /api/inventory – add inventory (creates food, batch if missing).
+- PATCH /api/inventory/:id – update inventory.
+- DELETE /api/inventory/:id – cascade delete batch/food if empty.
+- GET /api/alerts – list alerts (filters: severity, resolved, unread).
+- PATCH /api/alerts/:id/read – mark read/unread.
+- POST /api/alerts/read-all – bulk mark read.
+- PATCH /api/alerts/:id/resolve – resolve alert.
+- GET /api/devices – list devices.
+- POST /api/devices – register device.
+- PATCH /api/devices/:deviceId – update device.
+- DELETE /api/devices/:deviceId – delete if no references.
+- GET /api/settings – retrieve merged defaults + DB overrides.
+- PUT /api/settings/:key – upsert setting (editable keys only).
+- GET /api/surplus – list surplus items.
+- POST /api/surplus/:inventoryId – mark inventory as surplus.
+- PATCH /api/surplus/:id/action – set surplus action (DONATION, USED, DISMISSED).
+- POST /api/rfid/scan – lookup batch/inventory by RFID.
+- GET /api/reports – JSON aggregated report.
+- GET /api/reports/export.csv – CSV telemetry export.
+
+All endpoints return JSON; proper error handling via HttpError; validation errors result in 400.
+
+Database Schema (Prisma):
+- Device (id PK, deviceId unique string, name, ip, status, lastSeen) – one‑to‑many Shelves, Telemetry.
+- Shelf (id PK, shelfId unique string, name, maxCapacity Float?, deviceId FK) – many Telemetry, InventoryItem, Sensors.
+- Telemetry (id PK, deviceId String FK to Device.deviceId, shelfId String FK to Shelf.shelfId, weight, temperature, humidity, voc, gasStatus, timestamp).
+- FoodItem (id PK, name, category) – one‑to‑many Batches.
+- Batch (id PK, batchId unique, foodItemId FK, quantity, weightKg, expiryDate, rfidTagId?, shelfId optional) – one‑to‑many InventoryItem.
+- InventoryItem (id PK, batchId FK, shelfId optional FK, quantity, weight, addedAt, expiryDate, status enum) – optional SurplusItem.
+- Alert (id PK, type enum, severity enum, description, shelfId?, deviceId?, createdAt, read bool, resolved bool).
+- SurplusItem (id PK, inventoryId FK, action nullable enum, detectedAt).
+- Setting (id PK, key unique, value string).
+
+Key notes:
+- Telemetry foreign keys are stored as strings (deviceId, shelfId) but controller currently writes numeric IDs – type mismatch to be fixed.
+- Duplicate column maxCapacity vs capacityKg – capacityKg unused.
+- Indexes only on PK/unique; consider index on Telemetry.timestamp for large data.
+
+=== Code‑Quality & Architecture Audit ===
+
+Major Issues:
+1. Mixed naming (maxCapacity vs capacityKg) – remove unused column.
+2. Telemetry FK type mismatch – change to Int.
+3. Monolithic route files – split into controllers.
+4. No authentication – critical security gap.
+5. No pagination on heavy list endpoints – scalability risk.
+6. No rate‑limiting – potential DoS.
+7. No unit/integration tests – high regression risk.
+8. No structured logging – difficult monitoring.
+9. No Socket.IO client integration – realtime UI not functional.
+10. Missing CRUD forms in UI – incomplete user experience.
+
+Recommendations (priority):
+- P0: Implement JWT auth, protect mutating routes.
+- P0: Fix Telemetry FK types.
+- P1: Add Socket.IO client to React, set up listeners.
+- P1: Build CRUD forms for Shelf, Device, Inventory with react‑hook‑form + Zod.
+- P1: Add rate‑limiting middleware on telemetry.
+- P2: Add pagination to inventory & dashboard telemetry.
+- P2: Add DB indexes on Telemetry.timestamp.
+- P2: Implement dark‑mode toggle with persistence.
+- P3: Write unit & integration tests (Jest, React Testing Library).
+- P3: Generate OpenAPI (Swagger) spec.
+- P3: Add CI/CD workflow.
+- P3: Switch to PostgreSQL for production readiness.
+
+=== Audit Summary & Roadmap ===
+Current State:
+- Telemetry ingestion works, generates alerts, emits events.
+- Dashboard UI displays KPI cards (static data) and chart placeholder.
+- Shelves list and inventory table render data.
+- Alerts list works; resolve button works.
+- Settings UI shows key/value but lacks validation feedback.
+- Real‑time events emitted server‑side; client not listening.
+- No authentication, no pagination, no rate‑limiting, no tests.
+
+Major Problems:
+1. No authentication/authorisation.
+2. Telemetry FK type mismatch.
+3. Frontend lacks real‑time integration & CRUD forms.
+4. Scalability limited by SQLite & missing pagination.
+5. Missing testing & CI.
+
+Recommended short‑term (first 2 weeks) plan:
+Day 1‑2: Implement JWT auth middleware; protect routes.
+Day 3‑4: Fix Telemetry FK types (schema + controller) and run migration.
+Day 5: Add Socket.IO client integration in React (connect, listeners, cache updates).
+Day 6‑7: Build CRUD forms for Shelf, Device, Inventory with validation.
+Day 8: Add rate‑limiting middleware on telemetry.
+Day 9: Add pagination to inventory & dashboard telemetry endpoints.
+Day 10: Add indexes on Telemetry.timestamp.
+Day 11‑12: Write unit tests for telemetry handling and alerts.
+Day 13: Integrate structured logging (winston) and replace console logs.
+Day 14: Clean dead imports, remove duplicate columns, ensure naming consistency.
+
+After this sprint the project will have secure APIs, accurate DB schema, real‑time UI updates, basic forms, and a foundation for testing and production deployment.
+
+=== End of Documentation ===

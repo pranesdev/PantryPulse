@@ -1,0 +1,9 @@
+.env*
+!.env.example
+server/.env*
+!server/.env.example
+**/node_modules/
+**/dist/
+*.db
+*.db-journal
+npm-debug.log*

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: pantrypulse-api
+    runtime: node
+    rootDir: server
+    region: singapore
+    plan: free
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: DEMO_MODE
+        value: "false"
