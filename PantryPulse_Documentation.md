@@ -140,25 +140,25 @@ Kitchen managers, hotel F&B directors, restaurant owners, facility operators, in
 The server Prisma datasource now targets PostgreSQL, with Supabase connection variables
 documented in `.env.example` and a PostgreSQL initial migration in
 `server/prisma/migrations/`. The prior SQLite migration files are preserved in
-`server/prisma/migrations-sqlite-archive/`. Supabase is not connected yet: configure
-`DATABASE_URL` (Supabase session pooler) and `DIRECT_URL` (direct database connection)
-in the backend environment before deploying or running migrations.
+`server/prisma/migrations-sqlite-archive/`. The Supabase PostgreSQL database is
+connected to the deployed API, and the initial PostgreSQL migration has been applied.
 
-The existing local SQLite database at `server/prisma/dev.db` has not been copied to
-PostgreSQL. Keep it as the source until its records are migrated and verified.
+The existing local SQLite database at `server/prisma/dev.db` remains unchanged.
+Its 584 records were copied to Supabase and the cloud record counts were verified.
 
 ### Deployment
-The deployment target is Vercel for the Vite frontend and Render for the Express /
-Socket.IO API. Configure the Vercel project with `client/` as its root directory;
-Vite's default build command and output directory are `npm run build` and `dist`.
-Set `VITE_API_URL` to the Render API URL followed by `/api`, and `VITE_SOCKET_URL`
-to the Render API origin without `/api`.
+The Vite frontend is deployed on Vercel at `https://pantry-pulse-beta.vercel.app`.
+Its project root is `client/`, with build command `npm run build` and output
+directory `dist`. Production variables `VITE_API_URL` and `VITE_SOCKET_URL` point
+to the Render API.
 
-The Render Blueprint is `render.yaml`; it builds from `server/`, serves the API,
-and checks `/api/health`. Set `DATABASE_URL`, `DIRECT_URL`, and `FRONTEND_URL` as
-Render environment variables. Use the Supabase session-pooler URL for
-`DATABASE_URL`, its direct URL for `DIRECT_URL`, and the exact deployed Vercel
-origin for `FRONTEND_URL`. The Vercel SPA rewrite is in `client/vercel.json`.
+The Express / Socket.IO API is deployed on Render at
+`https://pantrypulse-api.onrender.com`. Its Blueprint is `render.yaml`; it builds
+from `server/` and checks `/api/health`. Render has `DATABASE_URL` set to the
+Supabase session-pooler URL, `DIRECT_URL` set to the Supabase direct connection,
+and `FRONTEND_URL` set to the Vercel origin. The Vercel SPA rewrite is in
+`client/vercel.json`. The Render free instance may spin down during inactivity,
+which can delay the first request after idle.
 
 **Deployment warning:** The API currently has no authentication, so its write
 endpoints are public when deployed. Do not use this deployment with sensitive or
