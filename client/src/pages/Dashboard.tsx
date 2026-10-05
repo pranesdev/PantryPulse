@@ -26,7 +26,7 @@ const timeOptions = [
 const chartTooltipStyle = { background: '#ffffff', border: '1px solid #d9e1da', borderRadius: '6px', color: '#1a2923' };
 
 export const Dashboard = () => {
-  const [range, setRange] = useState('24h');
+  const [range, setRange] = useState('7d');
   const [shelfId, setShelfId] = useState('all');
   const connected = useRealtimeStatus();
   const { data: dashboard, isLoading, isError, error, refetch } = useQuery({
@@ -123,6 +123,12 @@ export const Dashboard = () => {
             </select>
           </div>
         </div>
+
+        {chartData.length === 0 && (
+          <p role="status" className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
+            No telemetry readings in this time range. Try 7D or 30D to view older readings.
+          </p>
+        )}
 
         <div className="grid gap-4 xl:grid-cols-2">
           <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
