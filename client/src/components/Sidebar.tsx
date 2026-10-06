@@ -85,9 +85,9 @@ const SidebarContents = ({ mobileOpen, onClose }: { mobileOpen: boolean; onClose
         <div className="flex items-center justify-between text-sm text-slate-300">
           <div className="flex items-center gap-2">
             <span className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-            {connected ? 'Push updates active' : 'Auto-refresh (30 sec)'}
+            <span title="This confirms the browser is connected to PantryPulse server notifications; it does not verify database connectivity.">{connected ? 'Server notifications connected' : 'Refresh interval: 30 sec'}</span>
           </div>
-          <span className="text-xs text-slate-400">{dashboard?.demoMode ? 'DEMO DATA' : 'PRODUCTION DATA'}</span>
+          <span className="text-xs text-slate-400">{dashboard?.demoMode ? 'DEMO MODE' : 'STANDARD MODE'}</span>
         </div>
         <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
           <Activity className="h-3.5 w-3.5 text-emerald-300" />

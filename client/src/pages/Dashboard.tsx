@@ -69,7 +69,7 @@ export const Dashboard = () => {
         </div>
         <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-wide ${dashboard?.demoMode ? 'border-amber-500/30 bg-amber-500/10 text-amber-200' : connected ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' : 'border-slate-300 bg-white text-slate-600'}`}>
           <span className={`h-2.5 w-2.5 rounded-full ${dashboard?.demoMode ? 'bg-amber-400' : connected ? 'bg-emerald-400' : 'bg-slate-500'}`} />
-          {dashboard?.demoMode ? 'DEMO MODE' : connected ? 'LIVE' : 'POLLING'}
+          <span title="This indicates the server notification channel or refresh interval, not database connectivity.">{dashboard?.demoMode ? 'DEMO MODE' : 'STANDARD MODE'} | {connected ? 'Server notifications connected' : 'Refresh interval: 30 sec'}</span>
         </div>
       </div>
 
