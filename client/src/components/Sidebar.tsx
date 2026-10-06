@@ -85,7 +85,7 @@ const SidebarContents = ({ mobileOpen, onClose }: { mobileOpen: boolean; onClose
         <div className="flex items-center justify-between text-sm text-slate-300">
           <div className="flex items-center gap-2">
             <span className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-            {connected ? 'Realtime connected' : 'Polling fallback'}
+            {connected ? 'Push updates active' : 'Auto-refresh (30 sec)'}
           </div>
           <span className="text-xs text-slate-400">{dashboard?.demoMode ? 'DEMO' : 'LIVE'}</span>
         </div>

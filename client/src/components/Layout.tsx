@@ -73,7 +73,7 @@ export const Layout = () => {
 
                   <div className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-sm md:flex ${connected ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' : 'border-amber-500/30 bg-amber-500/10 text-amber-200'}`}>
                     <span className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                    {connected ? 'Realtime connected' : 'Polling updates'}
+                    {connected ? 'Push updates active' : 'Auto-refresh (30 sec)'}
                   </div>
 
                   <Link to="/alerts" aria-label="View alerts" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 text-slate-200 transition hover:border-slate-500">
